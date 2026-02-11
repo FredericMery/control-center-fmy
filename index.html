@@ -7,10 +7,8 @@
 
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
-
 <meta name="theme-color" content="#111827">
 </head>
-
 
 <body>
 
@@ -32,19 +30,33 @@
   </div>
 </div>
 
-
-
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 const supabaseUrl = 'https://fwfvbklrezgiwpfyywtv.supabase.co'
-const supabaseKey = 'JhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
+const supabaseKey = 'SUPABASE_ANON_KEY_HERE' // ← remplace ici
 
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 
 let tasks = []
 
+const modal = document.getElementById("modal")
+const fab = document.getElementById("fab")
+const counter = document.getElementById("counter")
+
+// 🔹 Ouvrir modal
+fab.onclick = () => {
+  modal.classList.remove("hidden")
+}
+
+// 🔹 Fermer modal en cliquant à l’extérieur
+modal.onclick = (e) => {
+  if (e.target === modal) {
+    modal.classList.add("hidden")
+  }
+}
+
+// 🔹 Charger tâches
 async function fetchTasks() {
   const { data, error } = await supabase
     .from('tasks')
@@ -54,18 +66,26 @@ async function fetchTasks() {
   if (!error) {
     tasks = data
     renderTasks()
+  } else {
+    console.error(error)
   }
 }
 
+// 🔹 Ajouter tâche
 async function addTask(title, deadline) {
-  await supabase.from('tasks').insert([
-    { title, deadline }
-  ])
+  const { error } = await supabase
+    .from('tasks')
+    .insert([{ title, deadline: deadline || null }])
+
+  if (error) console.error(error)
 }
 
+// 🔹 Affichage
 function renderTasks() {
   const list = document.getElementById("actionsList")
   list.innerHTML = ""
+
+  counter.textContent = tasks.length + " tâches"
 
   tasks.forEach(task => {
     const div = document.createElement("div")
@@ -78,6 +98,7 @@ function renderTasks() {
   })
 }
 
+// 🔹 Bouton Enregistrer
 document.getElementById("saveBtn").onclick = async () => {
   const text = document.getElementById("actionText").value
   const deadline = document.getElementById("deadline").value
@@ -88,28 +109,25 @@ document.getElementById("saveBtn").onclick = async () => {
 
   document.getElementById("actionText").value = ""
   document.getElementById("deadline").value = ""
-  document.getElementById("modal").classList.add("hidden")
+  modal.classList.add("hidden")
 
   fetchTasks()
 }
 
+// 🔹 Init + realtime
 window.onload = () => {
   fetchTasks()
 
   supabase
     .channel('tasks-changes')
-    .on('postgres_changes',
+    .on(
+      'postgres_changes',
       { event: '*', schema: 'public', table: 'tasks' },
-      () => {
-        fetchTasks()
-      }
+      () => fetchTasks()
     )
     .subscribe()
 }
 </script>
-
-
-
 
 </body>
 </html>
