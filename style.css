@@ -76,12 +76,18 @@ button {
   color: white;
 }
 
+
 .deadline-late {
-  color:#ef4444;
-  font-weight:bold;
+  color: #ef4444;
+  font-weight: 600;
 }
 
 .deadline-soon {
-  color:#f59e0b;
-  font-weight:bold;
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.deadline-late,
+.deadline-soon {
+  color: #ef4444 !important;
 }

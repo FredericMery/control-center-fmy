@@ -208,47 +208,23 @@ function formatDate(dateString) {
 
 
 
-function renderTasks() {
+function renderTasks(){
   const list = document.getElementById("actionsList")
   list.innerHTML = ""
 
-  // 🔹 Tri intelligent :
-  // 1. Urgent en premier
-  // 2. Puis date la plus proche
-  // 3. Puis date null en dernier
-  const sortedTasks = [...tasks].sort((a, b) => {
+  tasks.forEach(task => {
 
-    // Priorité poids
-    const priorityWeight = {
-      urgent: 1,
-      high: 2,
-      normal: 3,
-      low: 4
-    }
-
-    if (priorityWeight[a.priority] !== priorityWeight[b.priority]) {
-      return priorityWeight[a.priority] - priorityWeight[b.priority]
-    }
-
-    // Ensuite tri par date
-    if (!a.deadline) return 1
-    if (!b.deadline) return -1
-
-    return new Date(a.deadline) - new Date(b.deadline)
-  })
-
-  sortedTasks.forEach(task => {
-
-    const div = document.createElement("div")
-    div.className = "action-card"
-
-    // 🔹 Format date intelligent
     const deadlineText = formatDate(task.deadline)
 
     let deadlineClass = ""
-    if (deadlineText === "En retard") deadlineClass = "deadline-late"
-    else if (deadlineText === "Aujourd’hui" || deadlineText === "Demain")
+    if (deadlineText === "En retard") {
+      deadlineClass = "deadline-late"
+    } else if (deadlineText === "Aujourd’hui" || deadlineText === "Demain") {
       deadlineClass = "deadline-soon"
+    }
+
+    const div = document.createElement("div")
+    div.className = "action-card"
 
     div.innerHTML = `
       <div class="action-left">
@@ -260,12 +236,11 @@ function renderTasks() {
       </div>
     `
 
-    // 🔹 Double clic = archive
     div.ondblclick = () => archiveTask(task.id)
-
     list.appendChild(div)
   })
 }
+
 
 
 document.getElementById("saveBtn").onclick=async()=>{
