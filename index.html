@@ -11,6 +11,7 @@
 <meta name="theme-color" content="#111827">
 </head>
 
+
 <body>
 
 <header>
@@ -31,7 +32,84 @@
   </div>
 </div>
 
-<script src="app.js"></script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = 'https://fwfvbklrezgiwpfyywtv.supabase.co'
+const supabaseKey = 'JhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
+
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+let tasks = []
+
+async function fetchTasks() {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (!error) {
+    tasks = data
+    renderTasks()
+  }
+}
+
+async function addTask(title, deadline) {
+  await supabase.from('tasks').insert([
+    { title, deadline }
+  ])
+}
+
+function renderTasks() {
+  const list = document.getElementById("actionsList")
+  list.innerHTML = ""
+
+  tasks.forEach(task => {
+    const div = document.createElement("div")
+    div.className = "action-card"
+    div.innerHTML = `
+      <strong>${task.title}</strong>
+      <div class="deadline">${task.deadline || "Sans date"}</div>
+    `
+    list.appendChild(div)
+  })
+}
+
+document.getElementById("saveBtn").onclick = async () => {
+  const text = document.getElementById("actionText").value
+  const deadline = document.getElementById("deadline").value
+
+  if (!text) return
+
+  await addTask(text, deadline)
+
+  document.getElementById("actionText").value = ""
+  document.getElementById("deadline").value = ""
+  document.getElementById("modal").classList.add("hidden")
+
+  fetchTasks()
+}
+
+window.onload = () => {
+  fetchTasks()
+
+  supabase
+    .channel('tasks-changes')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'tasks' },
+      () => {
+        fetchTasks()
+      }
+    )
+    .subscribe()
+}
+</script>
+
+
+
 
 </body>
 </html>
