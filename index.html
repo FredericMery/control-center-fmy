@@ -34,9 +34,9 @@
 
 <script>
 const supabaseUrl = 'https://fwfvbklrezgiwpfyywtv.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg' // ← remplace ici
+const supabaseKey = 'SUPABASE_ANON_KEY_HERE'
 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+const db = window.supabase.createClient(supabaseUrl, supabaseKey)
 
 let tasks = []
 
@@ -58,13 +58,13 @@ modal.onclick = (e) => {
 
 // 🔹 Charger tâches
 async function fetchTasks() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('tasks')
     .select('*')
     .order('created_at', { ascending: false })
 
   if (!error) {
-    tasks = data
+    tasks = data || []
     renderTasks()
   } else {
     console.error(error)
@@ -73,7 +73,7 @@ async function fetchTasks() {
 
 // 🔹 Ajouter tâche
 async function addTask(title, deadline) {
-  const { error } = await supabase
+  const { error } = await db
     .from('tasks')
     .insert([{ title, deadline: deadline || null }])
 
@@ -118,7 +118,7 @@ document.getElementById("saveBtn").onclick = async () => {
 window.onload = () => {
   fetchTasks()
 
-  supabase
+  db
     .channel('tasks-changes')
     .on(
       'postgres_changes',
