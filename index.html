@@ -114,19 +114,28 @@ document.getElementById("saveBtn").onclick = async () => {
   fetchTasks()
 }
 
-// 🔹 Init + realtime
+
+// 🔹 Init + realtime PRO
 window.onload = () => {
   fetchTasks()
 
-  db
-    .channel('tasks-changes')
+  const channel = supabase
+    .channel('tasks-realtime')
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'tasks' },
-      () => fetchTasks()
+      (payload) => {
+        console.log("Realtime event:", payload)
+        fetchTasks()
+      }
     )
-    .subscribe()
+    .subscribe((status) => {
+      console.log("Realtime status:", status)
+    })
 }
+
+
+
 </script>
 
 </body>
