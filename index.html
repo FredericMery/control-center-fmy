@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Control Center FMY</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+
+<meta name="theme-color" content="#111827">
+</head>
+
+<body>
+
+<header>
+  <h1>Control Center FMY</h1>
+  <span id="counter"></span>
+</header>
+
+<main id="actionsList"></main>
+
+<button id="fab">+</button>
+
+<div id="modal" class="hidden">
+  <div class="modal-content">
+    <h3>Nouvelle Action</h3>
+    <input type="text" id="actionText" placeholder="Décrire l'action">
+    <input type="date" id="deadline">
+    <button id="saveBtn">Enregistrer</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
