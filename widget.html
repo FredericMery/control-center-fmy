@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+body{
+  margin:0;
+  background:#0f172a;
+  color:white;
+  font-family:-apple-system;
+  padding:20px;
+}
+.task{
+  margin-bottom:10px;
+}
+.badge{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:6px;
+}
+.low{background:#64748b;}
+.normal{background:#3b82f6;}
+.high{background:#f59e0b;}
+.urgent{background:#ef4444;}
+</style>
+</head>
+<body>
+<h4>Tâches</h4>
+<div id="list"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const db=window.supabase.createClient(
+'https://fwfvbklrezgiwpfyywtv.supabase.co',
+'SUPABASE_ANON_KEY_HERE'
+)
+
+async function load(){
+  const {data}=await db.from('tasks')
+    .select('*')
+    .eq('archived',false)
+    .order('created_at',{ascending:false})
+    .limit(5)
+
+  const list=document.getElementById("list")
+  list.innerHTML=""
+  data.forEach(t=>{
+    list.innerHTML+=`
+      <div class="task">
+        <span class="badge ${t.priority}"></span>
+        ${t.title}
+      </div>`
+  })
+}
+
+load()
+</script>
+</body>
+</html>
