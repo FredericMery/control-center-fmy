@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,12 +9,104 @@
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
 <meta name="theme-color" content="#111827">
+
+<style>
+body {
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#0f172a;
+  color:white;
+}
+
+header {
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+main {
+  padding:20px;
+}
+
+.action-card {
+  background:#1e293b;
+  padding:16px;
+  margin-bottom:12px;
+  border-radius:16px;
+  transition:transform 0.2s ease, opacity 0.2s ease;
+  touch-action:pan-y;
+}
+
+.action-card.swiping {
+  background:#7f1d1d;
+}
+
+.deadline {
+  font-size:0.8em;
+  opacity:0.6;
+}
+
+#fab {
+  position:fixed;
+  bottom:25px;
+  right:25px;
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  font-size:30px;
+  border:none;
+  background:linear-gradient(135deg,#3b82f6,#6366f1);
+  color:white;
+  box-shadow:0 8px 20px rgba(0,0,0,0.4);
+}
+
+#modal {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.hidden {
+  display:none!important;
+}
+
+.modal-content {
+  background:#1e293b;
+  padding:24px;
+  border-radius:20px;
+  width:90%;
+  max-width:400px;
+}
+
+input {
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border-radius:12px;
+  border:none;
+  font-size:16px;
+}
+
+#saveBtn {
+  margin-top:16px;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+  font-weight:bold;
+}
+</style>
 </head>
 
 <body>
 
 <header>
-  <h1>Control Center FMY</h1>
+  <h1>Control Center</h1>
   <span id="counter"></span>
 </header>
 
@@ -26,7 +119,7 @@
     <h3>Nouvelle Action</h3>
     <input type="text" id="actionText" placeholder="Décrire l'action">
     <input type="date" id="deadline">
-    <button id="saveBtn">Enregistrer</button>
+    <button id="saveBtn">Ajouter</button>
   </div>
 </div>
 
@@ -39,103 +132,91 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const db = window.supabase.createClient(supabaseUrl, supabaseKey)
 
 let tasks = []
-
 const modal = document.getElementById("modal")
 const fab = document.getElementById("fab")
 const counter = document.getElementById("counter")
 
-// 🔹 Ouvrir modal
-fab.onclick = () => {
-  modal.classList.remove("hidden")
-}
+fab.onclick = () => modal.classList.remove("hidden")
+modal.onclick = (e) => { if (e.target === modal) modal.classList.add("hidden") }
 
-// 🔹 Fermer modal en cliquant à l’extérieur
-modal.onclick = (e) => {
-  if (e.target === modal) {
-    modal.classList.add("hidden")
-  }
-}
-
-// 🔹 Charger tâches
 async function fetchTasks() {
-  const { data, error } = await db
+  const { data } = await db
     .from('tasks')
     .select('*')
-    .order('created_at', { ascending: false })
+    .eq('archived', false)
+    .order('created_at', { ascending:false })
 
-  if (!error) {
-    tasks = data || []
-    renderTasks()
-  } else {
-    console.error(error)
-  }
+  tasks = data || []
+  renderTasks()
 }
 
-// 🔹 Ajouter tâche
-async function addTask(title, deadline) {
-  const { error } = await db
-    .from('tasks')
-    .insert([{ title, deadline: deadline || null }])
-
-  if (error) console.error(error)
+async function archiveTask(id) {
+  await db.from('tasks')
+    .update({ archived:true })
+    .eq('id', id)
 }
 
-// 🔹 Affichage
 function renderTasks() {
   const list = document.getElementById("actionsList")
   list.innerHTML = ""
-
-  counter.textContent = tasks.length + " tâches"
+  counter.textContent = tasks.length + " actives"
 
   tasks.forEach(task => {
     const div = document.createElement("div")
     div.className = "action-card"
     div.innerHTML = `
       <strong>${task.title}</strong>
-      <div class="deadline">${task.deadline || "Sans date"}</div>
+      <div class="deadline">${task.deadline || ""}</div>
     `
+    
+    // Swipe logic
+    let startX = 0
+    div.addEventListener("touchstart", e => {
+      startX = e.touches[0].clientX
+    })
+
+    div.addEventListener("touchmove", e => {
+      const diff = e.touches[0].clientX - startX
+      if (diff < -50) {
+        div.classList.add("swiping")
+      }
+    })
+
+    div.addEventListener("touchend", e => {
+      const diff = e.changedTouches[0].clientX - startX
+      if (diff < -100) {
+        archiveTask(task.id)
+      }
+    })
+
     list.appendChild(div)
   })
 }
 
-// 🔹 Bouton Enregistrer
 document.getElementById("saveBtn").onclick = async () => {
   const text = document.getElementById("actionText").value
   const deadline = document.getElementById("deadline").value
-
   if (!text) return
 
-  await addTask(text, deadline)
+  await db.from('tasks').insert([{ title:text, deadline }])
 
-  document.getElementById("actionText").value = ""
-  document.getElementById("deadline").value = ""
+  document.getElementById("actionText").value=""
+  document.getElementById("deadline").value=""
   modal.classList.add("hidden")
 
   fetchTasks()
 }
 
-
-// 🔹 Init + realtime PRO
 window.onload = () => {
   fetchTasks()
 
-  const channel = supabase
-    .channel('tasks-realtime')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'tasks' },
-      (payload) => {
-        console.log("Realtime event:", payload)
-        fetchTasks()
-      }
+  db.channel('tasks-realtime')
+    .on('postgres_changes',
+      { event:'*', schema:'public', table:'tasks' },
+      () => fetchTasks()
     )
-    .subscribe((status) => {
-      console.log("Realtime status:", status)
-    })
+    .subscribe()
 }
-
-
-
 </script>
 
 </body>
