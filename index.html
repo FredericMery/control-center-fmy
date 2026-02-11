@@ -1,53 +1,69 @@
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Control Center FMY</title>
 
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#0f172a">
 
 <style>
-body {
+body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
   background:#0f172a;
   color:white;
 }
 
-header {
+header{
   padding:20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
 
-main {
+header small{
+  opacity:.6;
+  font-size:12px;
+}
+
+main{
   padding:20px;
 }
 
-.action-card {
+.action-card{
   background:#1e293b;
   padding:16px;
   margin-bottom:12px;
   border-radius:16px;
-  transition:transform 0.2s ease, opacity 0.2s ease;
+  transition:transform .25s ease, opacity .25s ease, background .2s ease;
   touch-action:pan-y;
+  position:relative;
 }
 
-.action-card.swiping {
+.action-card.done{
+  opacity:.5;
+  text-decoration:line-through;
+}
+
+.action-card.swiping{
   background:#7f1d1d;
 }
 
-.deadline {
-  font-size:0.8em;
-  opacity:0.6;
+.action-card.removing{
+  transform:translateX(-120%);
+  opacity:0;
 }
 
-#fab {
+.deadline{
+  font-size:.8em;
+  opacity:.6;
+}
+
+#fab{
   position:fixed;
   bottom:25px;
   right:25px;
@@ -58,31 +74,35 @@ main {
   border:none;
   background:linear-gradient(135deg,#3b82f6,#6366f1);
   color:white;
-  box-shadow:0 8px 20px rgba(0,0,0,0.4);
+  box-shadow:0 8px 20px rgba(0,0,0,.4);
 }
 
-#modal {
+#modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.6);
+  background:rgba(0,0,0,.6);
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
-.hidden {
-  display:none!important;
-}
+.hidden{display:none!important;}
 
-.modal-content {
+.modal-content{
   background:#1e293b;
   padding:24px;
   border-radius:20px;
   width:90%;
   max-width:400px;
+  animation:pop .2s ease;
 }
 
-input {
+@keyframes pop{
+  from{transform:scale(.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+input{
   width:100%;
   padding:14px;
   margin-top:12px;
@@ -91,7 +111,7 @@ input {
   font-size:16px;
 }
 
-#saveBtn {
+#saveBtn{
   margin-top:16px;
   padding:14px;
   border:none;
@@ -100,14 +120,26 @@ input {
   color:white;
   font-weight:bold;
 }
+
+#undoBar{
+  position:fixed;
+  bottom:100px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#111827;
+  padding:12px 20px;
+  border-radius:20px;
+  box-shadow:0 8px 20px rgba(0,0,0,.5);
+  display:none;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Control Center</h1>
-  <span id="counter"></span>
+  <h2>Control Center</h2>
+  <small id="liveStatus">● LIVE</small>
 </header>
 
 <main id="actionsList"></main>
@@ -117,107 +149,128 @@ input {
 <div id="modal" class="hidden">
   <div class="modal-content">
     <h3>Nouvelle Action</h3>
-    <input type="text" id="actionText" placeholder="Décrire l'action">
+    <input type="text" id="actionText" placeholder="Que dois-tu faire ?">
     <input type="date" id="deadline">
     <button id="saveBtn">Ajouter</button>
   </div>
 </div>
 
+<div id="undoBar">
+  Tâche archivée
+  <button onclick="undoArchive()">Annuler</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = 'https://fwfvbklrezgiwpfyywtv.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
+const supabaseUrl='https://fwfvbklrezgiwpfyywtv.supabase.co'
+const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
 
-const db = window.supabase.createClient(supabaseUrl, supabaseKey)
+const db=window.supabase.createClient(supabaseUrl,supabaseKey)
 
-let tasks = []
-const modal = document.getElementById("modal")
-const fab = document.getElementById("fab")
-const counter = document.getElementById("counter")
+let tasks=[]
+let lastArchived=null
 
-fab.onclick = () => modal.classList.remove("hidden")
-modal.onclick = (e) => { if (e.target === modal) modal.classList.add("hidden") }
+const modal=document.getElementById("modal")
+const fab=document.getElementById("fab")
+const undoBar=document.getElementById("undoBar")
 
-async function fetchTasks() {
-  const { data } = await db
+fab.onclick=()=>modal.classList.remove("hidden")
+modal.onclick=e=>{if(e.target===modal)modal.classList.add("hidden")}
+
+async function fetchTasks(){
+  const {data}=await db
     .from('tasks')
     .select('*')
-    .eq('archived', false)
-    .order('created_at', { ascending:false })
+    .eq('archived',false)
+    .order('created_at',{ascending:false})
 
-  tasks = data || []
+  tasks=data||[]
   renderTasks()
 }
 
-async function archiveTask(id) {
-  await db.from('tasks')
-    .update({ archived:true })
-    .eq('id', id)
+async function addTask(title,deadline){
+  await db.from('tasks').insert([{title,deadline}])
 }
 
-function renderTasks() {
-  const list = document.getElementById("actionsList")
-  list.innerHTML = ""
-  counter.textContent = tasks.length + " actives"
+async function archiveTask(id){
+  lastArchived=id
+  await db.from('tasks').update({archived:true}).eq('id',id)
+  showUndo()
+}
 
-  tasks.forEach(task => {
-    const div = document.createElement("div")
-    div.className = "action-card"
-    div.innerHTML = `
+async function undoArchive(){
+  if(!lastArchived)return
+  await db.from('tasks').update({archived:false}).eq('id',lastArchived)
+  undoBar.style.display="none"
+}
+
+async function toggleDone(id,current){
+  await db.from('tasks').update({done:!current}).eq('id',id)
+}
+
+function showUndo(){
+  undoBar.style.display="block"
+  setTimeout(()=>undoBar.style.display="none",5000)
+}
+
+function renderTasks(){
+  const list=document.getElementById("actionsList")
+  list.innerHTML=""
+
+  tasks.forEach(task=>{
+    const div=document.createElement("div")
+    div.className="action-card"+(task.done?" done":"")
+    div.innerHTML=`
       <strong>${task.title}</strong>
-      <div class="deadline">${task.deadline || ""}</div>
+      <div class="deadline">${task.deadline||""}</div>
     `
-    
-    // Swipe logic
-    let startX = 0
-    div.addEventListener("touchstart", e => {
-      startX = e.touches[0].clientX
+
+    div.onclick=()=>toggleDone(task.id,task.done)
+
+    let startX=0
+    div.addEventListener("touchstart",e=>startX=e.touches[0].clientX)
+
+    div.addEventListener("touchmove",e=>{
+      const diff=e.touches[0].clientX-startX
+      if(diff<-60)div.classList.add("swiping")
     })
 
-    div.addEventListener("touchmove", e => {
-      const diff = e.touches[0].clientX - startX
-      if (diff < -50) {
-        div.classList.add("swiping")
+    div.addEventListener("touchend",e=>{
+      const diff=e.changedTouches[0].clientX-startX
+      if(diff<-120){
+        div.classList.add("removing")
+        setTimeout(()=>archiveTask(task.id),200)
       }
-    })
-
-    div.addEventListener("touchend", e => {
-      const diff = e.changedTouches[0].clientX - startX
-      if (diff < -100) {
-        archiveTask(task.id)
-      }
+      div.classList.remove("swiping")
     })
 
     list.appendChild(div)
   })
 }
 
-document.getElementById("saveBtn").onclick = async () => {
-  const text = document.getElementById("actionText").value
-  const deadline = document.getElementById("deadline").value
-  if (!text) return
-
-  await db.from('tasks').insert([{ title:text, deadline }])
-
+document.getElementById("saveBtn").onclick=async()=>{
+  const text=document.getElementById("actionText").value
+  const deadline=document.getElementById("deadline").value
+  if(!text)return
+  await addTask(text,deadline)
   document.getElementById("actionText").value=""
   document.getElementById("deadline").value=""
   modal.classList.add("hidden")
-
-  fetchTasks()
 }
 
-window.onload = () => {
+window.onload=()=>{
   fetchTasks()
 
   db.channel('tasks-realtime')
     .on('postgres_changes',
-      { event:'*', schema:'public', table:'tasks' },
-      () => fetchTasks()
+      {event:'*',schema:'public',table:'tasks'},
+      ()=>fetchTasks()
     )
-    .subscribe()
+    .subscribe(status=>console.log("Realtime:",status))
 }
 </script>
 
 </body>
 </html>
+
