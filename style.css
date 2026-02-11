@@ -75,3 +75,13 @@ button {
   background: #22c55e;
   color: white;
 }
+
+.deadline-late {
+  color:#ef4444;
+  font-weight:bold;
+}
+
+.deadline-soon {
+  color:#f59e0b;
+  font-weight:bold;
+}

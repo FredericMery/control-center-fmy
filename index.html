@@ -183,24 +183,90 @@ async function archiveTask(id){
   await db.from('tasks').update({archived:true}).eq('id',id)
 }
 
-function renderTasks(){
-  const list=document.getElementById("actionsList")
-  list.innerHTML=""
+function formatDate(dateString) {
+  if (!dateString) return ""
 
-  tasks.forEach(task=>{
-    const div=document.createElement("div")
-    div.className="action-card"
-    div.innerHTML=`
+  const today = new Date()
+  const date = new Date(dateString)
+
+  // Normaliser heures
+  today.setHours(0,0,0,0)
+  date.setHours(0,0,0,0)
+
+  const diffDays = Math.round((date - today) / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return "Aujourd’hui"
+  if (diffDays === 1) return "Demain"
+  if (diffDays < 0) return "En retard"
+
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
+
+
+function renderTasks() {
+  const list = document.getElementById("actionsList")
+  list.innerHTML = ""
+
+  // 🔹 Tri intelligent :
+  // 1. Urgent en premier
+  // 2. Puis date la plus proche
+  // 3. Puis date null en dernier
+  const sortedTasks = [...tasks].sort((a, b) => {
+
+    // Priorité poids
+    const priorityWeight = {
+      urgent: 1,
+      high: 2,
+      normal: 3,
+      low: 4
+    }
+
+    if (priorityWeight[a.priority] !== priorityWeight[b.priority]) {
+      return priorityWeight[a.priority] - priorityWeight[b.priority]
+    }
+
+    // Ensuite tri par date
+    if (!a.deadline) return 1
+    if (!b.deadline) return -1
+
+    return new Date(a.deadline) - new Date(b.deadline)
+  })
+
+  sortedTasks.forEach(task => {
+
+    const div = document.createElement("div")
+    div.className = "action-card"
+
+    // 🔹 Format date intelligent
+    const deadlineText = formatDate(task.deadline)
+
+    let deadlineClass = ""
+    if (deadlineText === "En retard") deadlineClass = "deadline-late"
+    else if (deadlineText === "Aujourd’hui" || deadlineText === "Demain")
+      deadlineClass = "deadline-soon"
+
+    div.innerHTML = `
       <div class="action-left">
         <span class="badge ${task.priority}"></span>
         ${task.title}
       </div>
-      <div>${task.deadline||""}</div>
+      <div class="${deadlineClass}">
+        ${deadlineText}
+      </div>
     `
-    div.ondblclick=()=>archiveTask(task.id)
+
+    // 🔹 Double clic = archive
+    div.ondblclick = () => archiveTask(task.id)
+
     list.appendChild(div)
   })
 }
+
 
 document.getElementById("saveBtn").onclick=async()=>{
   const text=document.getElementById("actionText").value
