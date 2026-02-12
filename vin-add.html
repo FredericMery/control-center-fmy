@@ -83,6 +83,7 @@ button{
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
 <script>
 const supabaseUrl='https://fwfvbklrezgiwpfyywtv.supabase.co'
 const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
@@ -90,6 +91,7 @@ const db=window.supabase.createClient(supabaseUrl,supabaseKey)
 
 let rating=0
 
+// ⭐ Gestion étoiles
 document.querySelectorAll(".star").forEach(star=>{
   star.onclick=()=>{
     rating=parseInt(star.dataset.value)
@@ -99,14 +101,16 @@ document.querySelectorAll(".star").forEach(star=>{
   }
 })
 
+// 📸 Upload photo
 async function uploadPhoto(file){
-  const fileName=`wine_${Date.now()}`
+  const fileName=`wine_${Date.now()}_${file.name}`
+
   const {error}=await db.storage
     .from('memories')
     .upload(fileName,file)
 
   if(error){
-    console.error(error)
+    console.error("Upload error:",error)
     return null
   }
 
@@ -114,33 +118,44 @@ async function uploadPhoto(file){
   return data.publicUrl
 }
 
+// 💾 Enregistrer vin
 document.getElementById("saveWine").onclick=async()=>{
-  const name=document.getElementById("wineName").value
+
+  const title=document.getElementById("wineName").value
   const file=document.getElementById("winePhoto").files[0]
+  const domaine=document.getElementById("domaine").value
+  const annee=document.getElementById("annee").value
 
-  if(!name)return
-
-  let photoUrl=null
-  if(file){
-    photoUrl=await uploadPhoto(file)
+  if(!title){
+    alert("Nom du vin obligatoire")
+    return
   }
 
-  await db.from('memories').insert([{
-  category: 'vin',
-  title,
-  domaine,
-  annee: annee ? parseInt(annee) : null,
-  rating,
-  photo_url
-}])
+  let photo_url=null
 
-const domaine = document.getElementById("domaine").value
-const annee = document.getElementById("annee").value
+  if(file){
+    photo_url=await uploadPhoto(file)
+  }
 
+  const {error}=await db.from('memories').insert([{
+    category:'vin',
+    title:title,
+    domaine:domaine || null,
+    annee:annee ? parseInt(annee) : null,
+    rating:rating,
+    photo_url:photo_url
+  }])
+
+  if(error){
+    console.error("Insert error:",error)
+    alert("Erreur enregistrement")
+    return
+  }
 
   window.location.href='vins.html'
 }
 </script>
+
 
 </body>
 </html>
