@@ -453,17 +453,17 @@ input, select{
 
 .delete-btn{
   position:absolute;
-  top:12px;
-  right:12px;
+  top:10px;
+  right:10px;
+  z-index:10;
   background:rgba(0,0,0,0.6);
   border:none;
   color:white;
   border-radius:50%;
-  width:32px;
-  height:32px;
+  width:36px;
+  height:36px;
   font-size:16px;
   cursor:pointer;
-  transition:.2s;
 }
 
 .delete-btn:hover{

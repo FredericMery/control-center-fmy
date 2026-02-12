@@ -49,31 +49,41 @@ async function loadWines(){
 
   data.forEach(wine=>{
 
-    const card=document.createElement("div")
-    card.className="wine-card"
+  const card=document.createElement("div")
+  card.className="wine-card"
 
-    card.innerHTML=`
-      <img class="wine-photo" src="${wine.photo_url || 'https://via.placeholder.com/600x400?text=Vin'}">
-      <button class="delete-btn">✕</button>
-      <div class="wine-overlay">
-        <div class="wine-title">${wine.title}</div>
-        <div class="wine-meta">${wine.domaine || ''} ${wine.annee || ''}</div>
-        <div class="wine-stars">${"⭐".repeat(wine.rating || 0)}</div>
-      </div>
-    `
+  const img=document.createElement("img")
+  img.className="wine-photo"
+  img.src=wine.photo_url || "https://via.placeholder.com/600x400?text=Vin"
 
-    card.querySelector(".delete-btn").onclick=(e)=>{
-      e.stopPropagation()
-      deleteWine(wine)
-    }
+  const deleteBtn=document.createElement("button")
+  deleteBtn.className="delete-btn"
+  deleteBtn.innerHTML="🗑"
+  
+  deleteBtn.onclick=(e)=>{
+    e.stopPropagation()
+    deleteWine(wine)
+  }
 
-    card.onclick=()=>{
-      const query = `${wine.title} ${wine.domaine || ''} ${wine.annee || ''}`
-      window.location.href=`vin-detail.html?id=${wine.id}`
-    }
+  const overlay=document.createElement("div")
+  overlay.className="wine-overlay"
+  overlay.innerHTML=`
+    <div class="wine-title">${wine.title}</div>
+    <div class="wine-meta">${wine.domaine || ''} ${wine.annee || ''}</div>
+    <div class="wine-stars">${"⭐".repeat(wine.rating || 0)}</div>
+  `
 
-    container.appendChild(card)
-  })
+  card.appendChild(img)
+  card.appendChild(deleteBtn)
+  card.appendChild(overlay)
+
+  card.onclick=()=>{
+    window.location.href=`vin-detail.html?id=${wine.id}`
+  }
+
+  container.appendChild(card)
+})
+
 }
 
 window.onload=loadWines
