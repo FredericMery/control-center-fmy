@@ -14,63 +14,65 @@
   <button class="add-btn" onclick="window.location.href='vin-add.html'">+</button>
 </header>
 
-<div id="wineList"></div>
+<div id="wineList" class="wine-grid"></div>
 
 <a href="memoire.html" class="back">← Retour</a>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const supabaseUrl='https://fwfvbklrezgiwpfyywtv.supabase.co'
 const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
 const db=window.supabase.createClient(supabaseUrl,supabaseKey)
 
-async function loadWines(){
+async function deleteWine(wine){
+  if(!confirm("Supprimer ce vin ?")) return
 
-  const {data,error}=await db
+  if(wine.photo_url){
+    const fileName = wine.photo_url.split('/').pop()
+    await db.storage.from('memories').remove([fileName])
+  }
+
+  await db.from('memories').delete().eq('id',wine.id)
+  loadWines()
+}
+
+async function loadWines(){
+  const {data}=await db
     .from('memories')
     .select('*')
     .eq('category','vin')
     .order('rating',{ascending:false})
     .order('created_at',{ascending:false})
 
-  if(error){
-    console.error(error)
-    return
-  }
-
   const container=document.getElementById("wineList")
   container.innerHTML=""
 
   data.forEach(wine=>{
 
-    const div=document.createElement("div")
-    div.className="wine-card"
+    const card=document.createElement("div")
+    card.className="wine-card"
 
-    div.innerHTML=`
-      ${wine.photo_url 
-        ? `<img src="${wine.photo_url}" class="wine-image">` 
-        : `<div class="wine-image" style="background:#334155;display:flex;align-items:center;justify-content:center;">🍷</div>`
-      }
-
-      <div class="wine-body">
+    card.innerHTML=`
+      <img class="wine-photo" src="${wine.photo_url || 'https://via.placeholder.com/600x400?text=Vin'}">
+      <button class="delete-btn">✕</button>
+      <div class="wine-overlay">
         <div class="wine-title">${wine.title}</div>
-        <div class="wine-sub">
-          ${wine.domaine || ""} ${wine.annee ? "• " + wine.annee : ""}
-        </div>
-        <div class="stars">
-          ${"⭐".repeat(wine.rating || 0)}
-        </div>
+        <div class="wine-meta">${wine.domaine || ''} ${wine.annee || ''}</div>
+        <div class="wine-stars">${"⭐".repeat(wine.rating || 0)}</div>
       </div>
     `
 
-    div.onclick=()=>{
-      const query=`${wine.title || ""} ${wine.domaine || ""} ${wine.annee || ""} vin`
-      const url="https://www.google.com/search?q="+encodeURIComponent(query)
-      window.open(url,"_blank")
+    card.querySelector(".delete-btn").onclick=(e)=>{
+      e.stopPropagation()
+      deleteWine(wine)
     }
 
-    container.appendChild(div)
+    card.onclick=()=>{
+      const query = `${wine.title} ${wine.domaine || ''} ${wine.annee || ''}`
+      window.location.href=`vin-detail.html?id=${wine.id}`
+    }
+
+    container.appendChild(card)
   })
 }
 

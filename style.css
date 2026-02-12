@@ -396,3 +396,76 @@ input, select{
   color:#f59e0b;
   font-size:16px;
 }
+
+/* === VINS MODERN LIST === */
+
+.wine-grid{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.wine-card{
+  position:relative;
+  border-radius:20px;
+  overflow:hidden;
+  background:#1e293b;
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+  transition:.3s;
+  cursor:pointer;
+}
+
+.wine-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 15px 35px rgba(0,0,0,0.6);
+}
+
+.wine-photo{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  display:block;
+}
+
+.wine-overlay{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:16px;
+  background:linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.wine-title{
+  font-size:18px;
+  font-weight:600;
+}
+
+.wine-meta{
+  font-size:14px;
+  opacity:.85;
+}
+
+.wine-stars{
+  margin-top:6px;
+  color:#f59e0b;
+}
+
+.delete-btn{
+  position:absolute;
+  top:12px;
+  right:12px;
+  background:rgba(0,0,0,0.6);
+  border:none;
+  color:white;
+  border-radius:50%;
+  width:32px;
+  height:32px;
+  font-size:16px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.delete-btn:hover{
+  background:#ef4444;
+}
