@@ -73,7 +73,9 @@ async function loadWine(){
     img.style.display="block"
   }
 
-  fetchWiki(data.title)
+  const searchQuery = `${data.title} ${data.domaine || ""} ${data.annee || ""}`
+fetchWiki(searchQuery)
+
 }
 
 async function fetchWiki(name){

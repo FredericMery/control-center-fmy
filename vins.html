@@ -49,41 +49,43 @@ async function loadWines(){
 
   data.forEach(wine=>{
 
-  const card=document.createElement("div")
-  card.className="wine-card"
+    const card=document.createElement("div")
+    card.className="wine-card"
 
-  const img=document.createElement("img")
-  img.className="wine-photo"
-  img.src=wine.photo_url || "https://via.placeholder.com/600x400?text=Vin"
+    const img=document.createElement("img")
+    img.className="wine-photo"
+    img.src=wine.photo_url || "https://via.placeholder.com/600x400?text=Vin"
 
-  const deleteBtn=document.createElement("button")
-  deleteBtn.className="delete-btn"
-  deleteBtn.innerHTML="🗑"
-  
-  deleteBtn.onclick=(e)=>{
-    e.stopPropagation()
-    deleteWine(wine)
-  }
+    const deleteBtn=document.createElement("button")
+    deleteBtn.className="delete-btn"
+    deleteBtn.innerHTML="🗑"
 
-  const overlay=document.createElement("div")
-  overlay.className="wine-overlay"
-  overlay.innerHTML=`
-    <div class="wine-title">${wine.title}</div>
-    <div class="wine-meta">${wine.domaine || ''} ${wine.annee || ''}</div>
-    <div class="wine-stars">${"⭐".repeat(wine.rating || 0)}</div>
-  `
+    deleteBtn.onclick=(e)=>{
+      e.stopPropagation()
+      deleteWine(wine)
+    }
 
-  card.appendChild(img)
-  card.appendChild(deleteBtn)
-  card.appendChild(overlay)
+    const overlay=document.createElement("div")
+    overlay.className="wine-overlay"
+    overlay.innerHTML=`
+      <div class="wine-title">${wine.title}</div>
+      <div class="wine-meta">${wine.domaine || ''} ${wine.annee || ''}</div>
+      <div class="wine-stars">${"⭐".repeat(wine.rating || 0)}</div>
+    `
 
-  card.onclick=()=>{
-    window.location.href=`vin-detail.html?id=${wine.id}`
-  }
+    card.appendChild(img)
+    card.appendChild(deleteBtn)
+    card.appendChild(overlay)
 
-  container.appendChild(card)
-})
+    // 🔍 RECHERCHE GOOGLE
+    card.onclick=()=>{
+      const query=`${wine.title || ""} ${wine.domaine || ""} ${wine.annee || ""} vin`
+      const url="https://www.google.com/search?q="+encodeURIComponent(query)
+      window.open(url,"_blank")
+    }
 
+    container.appendChild(card)
+  })
 }
 
 window.onload=loadWines
