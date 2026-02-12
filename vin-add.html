@@ -103,57 +103,68 @@ document.querySelectorAll(".star").forEach(star=>{
 
 // 📸 Upload photo
 async function uploadPhoto(file){
-  const fileName=`wine_${Date.now()}_${file.name}`
 
-  const {error}=await db.storage
+  const fileExt = file.name.split('.').pop()
+  const fileName = `wine_${Date.now()}.${fileExt}`
+
+  const { data, error } = await db.storage
     .from('memories')
-    .upload(fileName,file)
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
 
   if(error){
-    console.error("Upload error:",error)
+    console.error("Erreur upload :", error)
+    alert("Erreur upload photo")
     return null
   }
 
-  const {data}=db.storage.from('memories').getPublicUrl(fileName)
-  return data.publicUrl
+  const { data: publicData } = db.storage
+    .from('memories')
+    .getPublicUrl(fileName)
+
+  return publicData.publicUrl
 }
 
+
 // 💾 Enregistrer vin
-document.getElementById("saveWine").onclick=async()=>{
+document.getElementById("saveWine").onclick = async () => {
 
-  const title=document.getElementById("wineName").value
-  const file=document.getElementById("winePhoto").files[0]
-  const domaine=document.getElementById("domaine").value
-  const annee=document.getElementById("annee").value
+  const name = document.getElementById("wineName").value
+  const domaine = document.getElementById("domaine").value
+  const annee = document.getElementById("annee").value
+  const file = document.getElementById("winePhoto").files[0]
 
-  if(!title){
-    alert("Nom du vin obligatoire")
+  if(!name){
+    alert("Nom obligatoire")
     return
   }
 
-  let photo_url=null
+  let photoUrl = null
 
   if(file){
-    photo_url=await uploadPhoto(file)
+    photoUrl = await uploadPhoto(file)
   }
 
-  const {error}=await db.from('memories').insert([{
-    category:'vin',
-    title:title,
-    domaine:domaine || null,
-    annee:annee ? parseInt(annee) : null,
-    rating:rating,
-    photo_url:photo_url
+  const { error } = await db.from('memories').insert([{
+    category: 'vin',
+    title: name,
+    domaine: domaine || null,
+    annee: annee ? parseInt(annee) : null,
+    rating: rating || 0,
+    photo_url: photoUrl
   }])
 
   if(error){
-    console.error("Insert error:",error)
-    alert("Erreur enregistrement")
+    console.error(error)
+    alert("Erreur insertion")
     return
   }
 
-  window.location.href='vins.html'
+  window.location.href = 'vins.html'
 }
+
 </script>
 
 
