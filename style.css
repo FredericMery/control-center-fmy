@@ -165,3 +165,147 @@ input, select{
   margin-top:4px;
 }
 
+/* ========================= */
+/* ====== PAGE VINS ======== */
+/* ========================= */
+
+.page-container{
+  padding:20px;
+}
+
+.page-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.page-header h2{
+  margin:0;
+}
+
+.add-btn{
+  background:#3b82f6;
+  color:white;
+  font-size:20px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.add-btn:hover{
+  transform:scale(1.05);
+}
+
+.wine-card{
+  background:#1e293b;
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:16px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  cursor:pointer;
+  transition:0.25s;
+}
+
+.wine-card:hover{
+  transform:scale(1.02);
+  background:#263449;
+}
+
+.wine-img{
+  width:65px;
+  height:65px;
+  object-fit:cover;
+  border-radius:10px;
+  flex-shrink:0;
+}
+
+.wine-content{
+  flex:1;
+}
+
+.wine-title{
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.stars{
+  color:#f59e0b;
+  font-size:14px;
+}
+
+.back-link{
+  margin-top:20px;
+  display:inline-block;
+  color:#3b82f6;
+  text-decoration:none;
+  font-size:14px;
+}
+
+.back-link:hover{
+  text-decoration:underline;
+}
+
+/* ========================= */
+/* ====== VIN DETAIL ======= */
+/* ========================= */
+
+.detail-container{
+  padding:20px;
+}
+
+.detail-img{
+  width:100%;
+  border-radius:14px;
+  margin-bottom:20px;
+}
+
+.detail-title{
+  font-size:22px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+.detail-stars{
+  color:#f59e0b;
+  margin-bottom:15px;
+}
+
+.wiki-box{
+  background:#1e293b;
+  padding:16px;
+  border-radius:14px;
+  margin-top:15px;
+  font-size:14px;
+  line-height:1.5;
+}
+
+.action-buttons{
+  margin-top:20px;
+  display:flex;
+  gap:10px;
+}
+
+.delete-btn{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.back-link{
+  display:inline-block;
+  margin-top:20px;
+  color:#3b82f6;
+  text-decoration:none;
+}

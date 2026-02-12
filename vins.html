@@ -3,79 +3,25 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vins</title>
+<title>Mes Vins</title>
 
-<style>
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-  background:#0f172a;
-  color:white;
-  padding:20px;
-}
-
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-button{
-  border:none;
-  border-radius:20px;
-  padding:8px 14px;
-  cursor:pointer;
-}
-
-.add-btn{
-  background:#3b82f6;
-  color:white;
-  font-size:20px;
-  width:40px;
-  height:40px;
-  border-radius:50%;
-}
-
-.card{
-  background:#1e293b;
-  padding:14px;
-  margin-bottom:12px;
-  border-radius:16px;
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-
-img{
-  width:60px;
-  height:60px;
-  object-fit:cover;
-  border-radius:10px;
-}
-
-.stars{
-  color:#f59e0b;
-}
-
-.back{
-  margin-top:20px;
-  display:inline-block;
-  color:#3b82f6;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>Mes Vins</h2>
-  <button class="add-btn" onclick="window.location.href='vin-add.html'">+</button>
-</header>
+<div class="page-container">
 
-<div id="wineList"></div>
+  <div class="page-header">
+    <h2>🍷 Mes Vins</h2>
+    <button class="add-btn" onclick="window.location.href='vin-add.html'">+</button>
+  </div>
 
-<a href="memoire.html" class="back">← Retour</a>
+  <div id="wineList"></div>
+
+  <a href="memoire.html" class="back-link">← Retour</a>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -85,27 +31,43 @@ const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs
 const db=window.supabase.createClient(supabaseUrl,supabaseKey)
 
 async function loadWines(){
-  const {data}=await db
+
+  const {data,error}=await db
     .from('memories')
     .select('*')
     .eq('category','vin')
     .order('rating',{ascending:false})
     .order('created_at',{ascending:false})
 
+  if(error){
+    console.error(error)
+    return
+  }
+
   const container=document.getElementById("wineList")
   container.innerHTML=""
 
+  if(!data || data.length===0){
+    container.innerHTML="<p>Aucun vin enregistré pour le moment.</p>"
+    return
+  }
+
   data.forEach(wine=>{
+
     const div=document.createElement("div")
-    div.className="card"
+    div.className="wine-card"
 
     div.innerHTML=`
-      ${wine.photo_url ? `<img src="${wine.photo_url}">` : ''}
-      <div>
-        <strong>${wine.title}</strong><br>
+      ${wine.photo_url ? `<img class="wine-img" src="${wine.photo_url}">` : ''}
+      <div class="wine-content">
+        <div class="wine-title">${wine.title}</div>
         <div class="stars">${"⭐".repeat(wine.rating || 0)}</div>
       </div>
     `
+
+    div.onclick=()=>{
+      window.location.href=`vin-detail.html?id=${wine.id}`
+    }
 
     container.appendChild(div)
   })
