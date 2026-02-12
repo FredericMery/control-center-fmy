@@ -65,6 +65,9 @@ button{
 
 <input type="text" id="wineName" placeholder="Nom du vin">
 <input type="file" id="winePhoto" accept="image/*">
+<input type="text" id="domaine" placeholder="Domaine (ex: Château Margaux)">
+<input type="number" id="annee" placeholder="Année (ex: 2018)">
+
 
 <div class="stars">
   <span class="star" data-value="1">⭐</span>
@@ -122,14 +125,18 @@ document.getElementById("saveWine").onclick=async()=>{
     photoUrl=await uploadPhoto(file)
   }
 
-  await db.from('memories').insert([
-    {
-      category:'vin',
-      title:name,
-      rating,
-      photo_url:photoUrl
-    }
-  ])
+  await db.from('memories').insert([{
+  category: 'vin',
+  title,
+  domaine,
+  annee: annee ? parseInt(annee) : null,
+  rating,
+  photo_url
+}])
+
+const domaine = document.getElementById("domaine").value
+const annee = document.getElementById("annee").value
+
 
   window.location.href='vins.html'
 }

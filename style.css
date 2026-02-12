@@ -309,3 +309,48 @@ input, select{
   color:#3b82f6;
   text-decoration:none;
 }
+
+.wine-card{
+  background:#1e293b;
+  border-radius:16px;
+  margin-bottom:16px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.wine-card:hover{
+  transform:scale(1.02);
+}
+
+.wine-image img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  display:block;
+}
+
+.wine-placeholder{
+  height:180px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  background:#334155;
+}
+
+.wine-content{
+  padding:14px;
+}
+
+.stars{
+  color:#f59e0b;
+  margin-top:6px;
+}
+
+.wine-meta{
+  font-size:14px;
+  opacity:.7;
+  margin-top:4px;
+}
+
