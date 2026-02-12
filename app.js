@@ -2,6 +2,32 @@ const supabaseUrl = 'https://fwfvbklrezgiwpfyywtv.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
 const db = window.supabase.createClient(supabaseUrl, supabaseKey)
 
+
+let currentMode = "pro"
+
+const proBtn = document.getElementById("proBtn")
+const persoBtn = document.getElementById("persoBtn")
+
+proBtn.onclick = () => {
+  currentMode = "pro"
+  proBtn.classList.add("active")
+  persoBtn.classList.remove("active")
+  fetchTasks()
+}
+
+persoBtn.onclick = () => {
+  currentMode = "perso"
+  persoBtn.classList.add("active")
+  proBtn.classList.remove("active")
+  fetchTasks()
+}
+
+
+
+
+
+
+
 let showArchived = false
 let tasks = []
 
@@ -19,15 +45,17 @@ toggleView.onclick = () => {
 }
 
 async function fetchTasks(){
-  const { data } = await db
+  const {data}=await db
     .from('tasks')
     .select('*')
-    .eq('archived', showArchived)
-    .order('created_at', { ascending:false })
+    .eq('archived',showArchived)
+    .eq('type',currentMode)
+    .order('created_at',{ascending:false})
 
-  tasks = data || []
+  tasks=data||[]
   renderTasks()
 }
+
 
 async function archiveTask(id){
   await db.from('tasks').update({ archived:true }).eq('id', id)
@@ -101,8 +129,17 @@ document.getElementById("saveBtn").onclick = async () => {
   if(!text) return
 
   await db.from('tasks').insert([
-    { title:text, deadline, priority, archived:false }
-  ])
+  {
+    title:text,
+    deadline,
+    priority,
+    type: currentMode
+  }
+])
+
+
+
+
 
   document.getElementById("actionText").value=""
   modal.classList.add("hidden")

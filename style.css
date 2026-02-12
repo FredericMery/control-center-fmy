@@ -140,3 +140,21 @@ input, select{
   font-weight:bold;
   cursor:pointer;
 }
+
+.mode-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-switch button {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  background: #1e293b;
+  color: white;
+  cursor: pointer;
+}
+
+.mode-switch button.active {
+  background: #3b82f6;
+}
