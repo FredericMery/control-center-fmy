@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ajouter un vin</title>
+
+<style>
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#0f172a;
+  color:white;
+  padding:20px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border-radius:12px;
+  border:none;
+  font-size:16px;
+}
+
+button{
+  margin-top:16px;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#22c55e;
+  color:white;
+  font-weight:bold;
+  width:100%;
+  cursor:pointer;
+}
+
+.stars{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+  font-size:28px;
+  cursor:pointer;
+}
+
+.star{
+  opacity:0.3;
+}
+
+.star.active{
+  opacity:1;
+}
+
+.back{
+  margin-top:20px;
+  display:inline-block;
+  color:#3b82f6;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Ajouter un vin</h2>
+
+<input type="text" id="wineName" placeholder="Nom du vin">
+<input type="file" id="winePhoto" accept="image/*">
+
+<div class="stars">
+  <span class="star" data-value="1">⭐</span>
+  <span class="star" data-value="2">⭐</span>
+  <span class="star" data-value="3">⭐</span>
+  <span class="star" data-value="4">⭐</span>
+  <span class="star" data-value="5">⭐</span>
+</div>
+
+<button id="saveWine">Enregistrer</button>
+
+<a href="vins.html" class="back">← Retour</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl='https://fwfvbklrezgiwpfyywtv.supabase.co'
+const supabaseKey='REMETS_TA_CLE_ANON'
+const db=window.supabase.createClient(supabaseUrl,supabaseKey)
+
+let rating=0
+
+document.querySelectorAll(".star").forEach(star=>{
+  star.onclick=()=>{
+    rating=parseInt(star.dataset.value)
+    document.querySelectorAll(".star").forEach(s=>{
+      s.classList.toggle("active",s.dataset.value<=rating)
+    })
+  }
+})
+
+async function uploadPhoto(file){
+  const fileName=`wine_${Date.now()}`
+  const {error}=await db.storage
+    .from('memories')
+    .upload(fileName,file)
+
+  if(error){
+    console.error(error)
+    return null
+  }
+
+  const {data}=db.storage.from('memories').getPublicUrl(fileName)
+  return data.publicUrl
+}
+
+document.getElementById("saveWine").onclick=async()=>{
+  const name=document.getElementById("wineName").value
+  const file=document.getElementById("winePhoto").files[0]
+
+  if(!name)return
+
+  let photoUrl=null
+  if(file){
+    photoUrl=await uploadPhoto(file)
+  }
+
+  await db.from('memories').insert([
+    {
+      category:'vin',
+      title:name,
+      rating,
+      photo_url:photoUrl
+    }
+  ])
+
+  window.location.href='vins.html'
+}
+</script>
+
+</body>
+</html>

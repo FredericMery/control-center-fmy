@@ -14,54 +14,48 @@ body{
   padding:20px;
 }
 
-input{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  border-radius:12px;
-  border:none;
-  font-size:16px;
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
 }
 
 button{
-  margin-top:16px;
-  padding:14px;
   border:none;
-  border-radius:12px;
-  background:#22c55e;
+  border-radius:20px;
+  padding:8px 14px;
+  cursor:pointer;
+}
+
+.add-btn{
+  background:#3b82f6;
   color:white;
-  font-weight:bold;
-  width:100%;
-  cursor:pointer;
-}
-
-.stars{
-  display:flex;
-  gap:10px;
-  margin-top:12px;
-  font-size:28px;
-  cursor:pointer;
-}
-
-.star{
-  opacity:0.3;
-}
-
-.star.active{
-  opacity:1;
+  font-size:20px;
+  width:40px;
+  height:40px;
+  border-radius:50%;
 }
 
 .card{
   background:#1e293b;
-  padding:16px;
-  margin-top:20px;
+  padding:14px;
+  margin-bottom:12px;
   border-radius:16px;
+  display:flex;
+  gap:12px;
+  align-items:center;
 }
 
 img{
-  width:100%;
-  border-radius:12px;
-  margin-top:10px;
+  width:60px;
+  height:60px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.stars{
+  color:#f59e0b;
 }
 
 .back{
@@ -74,20 +68,10 @@ img{
 
 <body>
 
-<h2>Ajouter un vin</h2>
-
-<input type="text" id="wineName" placeholder="Nom du vin">
-<input type="file" id="winePhoto" accept="image/*">
-
-<div class="stars" id="stars">
-  <span class="star" data-value="1">⭐</span>
-  <span class="star" data-value="2">⭐</span>
-  <span class="star" data-value="3">⭐</span>
-  <span class="star" data-value="4">⭐</span>
-  <span class="star" data-value="5">⭐</span>
-</div>
-
-<button id="saveWine">Enregistrer</button>
+<header>
+  <h2>Mes Vins</h2>
+  <button class="add-btn" onclick="window.location.href='vin-add.html'">+</button>
+</header>
 
 <div id="wineList"></div>
 
@@ -100,75 +84,12 @@ const supabaseUrl='https://fwfvbklrezgiwpfyywtv.supabase.co'
 const supabaseKey='REMETS_TA_CLE_ANON'
 const db=window.supabase.createClient(supabaseUrl,supabaseKey)
 
-let rating=0
-
-const stars=document.querySelectorAll(".star")
-
-stars.forEach(star=>{
-  star.onclick=()=>{
-    rating=parseInt(star.dataset.value)
-    updateStars()
-  }
-})
-
-function updateStars(){
-  stars.forEach(star=>{
-    star.classList.toggle("active",star.dataset.value<=rating)
-  })
-}
-
-async function uploadPhoto(file){
-  const fileName=`wine_${Date.now()}`
-  const {data,error}=await db.storage
-    .from('memories')
-    .upload(fileName,file)
-
-  if(error){
-    console.error(error)
-    return null
-  }
-
-  const {data:publicUrl}=db.storage
-    .from('memories')
-    .getPublicUrl(fileName)
-
-  return publicUrl.publicUrl
-}
-
-async function saveWine(){
-  const name=document.getElementById("wineName").value
-  const file=document.getElementById("winePhoto").files[0]
-
-  if(!name)return
-
-  let photoUrl=null
-
-  if(file){
-    photoUrl=await uploadPhoto(file)
-  }
-
-  await db.from('memories').insert([
-    {
-      category:'vin',
-      title:name,
-      rating,
-      photo_url:photoUrl
-    }
-  ])
-
-  document.getElementById("wineName").value=""
-  document.getElementById("winePhoto").value=""
-  rating=0
-  updateStars()
-
-  loadWines()
-}
-
 async function loadWines(){
   const {data}=await db
     .from('memories')
     .select('*')
     .eq('category','vin')
+    .order('rating',{ascending:false})
     .order('created_at',{ascending:false})
 
   const container=document.getElementById("wineList")
@@ -177,16 +98,18 @@ async function loadWines(){
   data.forEach(wine=>{
     const div=document.createElement("div")
     div.className="card"
+
     div.innerHTML=`
-      <strong>${wine.title}</strong><br>
-      ${"⭐".repeat(wine.rating||0)}
-      ${wine.photo_url?`<img src="${wine.photo_url}">`:''}
+      ${wine.photo_url ? `<img src="${wine.photo_url}">` : ''}
+      <div>
+        <strong>${wine.title}</strong><br>
+        <div class="stars">${"⭐".repeat(wine.rating || 0)}</div>
+      </div>
     `
+
     container.appendChild(div)
   })
 }
-
-document.getElementById("saveWine").onclick=saveWine
 
 window.onload=loadWines
 </script>
