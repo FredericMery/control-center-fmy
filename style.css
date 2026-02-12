@@ -354,3 +354,45 @@ input, select{
   margin-top:4px;
 }
 
+.wine-card{
+  background:#1e293b;
+  border-radius:18px;
+  overflow:hidden;
+  margin-bottom:18px;
+  cursor:pointer;
+  transition:.25s;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+.wine-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 30px rgba(0,0,0,.4);
+}
+
+.wine-image{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  display:block;
+}
+
+.wine-body{
+  padding:16px;
+}
+
+.wine-title{
+  font-size:18px;
+  font-weight:600;
+}
+
+.wine-sub{
+  font-size:14px;
+  opacity:.7;
+  margin-top:4px;
+}
+
+.stars{
+  margin-top:8px;
+  color:#f59e0b;
+  font-size:16px;
+}
