@@ -158,3 +158,10 @@ input, select{
 .mode-switch button.active {
   background: #3b82f6;
 }
+
+.age{
+  font-size:12px;
+  opacity:0.5;
+  margin-top:4px;
+}
+

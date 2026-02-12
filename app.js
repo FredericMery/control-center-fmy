@@ -57,6 +57,26 @@ async function fetchTasks(){
 }
 
 
+
+function getTaskAge(createdAt){
+  if(!createdAt) return ""
+
+  const created = new Date(createdAt)
+  const today = new Date()
+
+  created.setHours(0,0,0,0)
+  today.setHours(0,0,0,0)
+
+  const diffDays = Math.floor((today - created) / (1000*60*60*24))
+
+  if(diffDays === 0) return "Créée aujourd’hui"
+  if(diffDays === 1) return "1 jour"
+  return diffDays + " jours"
+}
+
+
+
+
 async function archiveTask(id){
   await db.from('tasks').update({ archived:true }).eq('id', id)
 }
@@ -83,43 +103,68 @@ function formatDate(dateString){
   })
 }
 
+function getTaskAge(createdAt){
+  if(!createdAt) return ""
+
+  const created=new Date(createdAt)
+  const today=new Date()
+
+  created.setHours(0,0,0,0)
+  today.setHours(0,0,0,0)
+
+  const diffDays=Math.floor((today-created)/(1000*60*60*24))
+
+  if(diffDays===0) return "Créée aujourd’hui"
+  if(diffDays===1) return "1 jour"
+  return diffDays+" jours"
+}
+
+
 function renderTasks(){
-  const list = document.getElementById("actionsList")
-  list.innerHTML = ""
+  const list=document.getElementById("actionsList")
+  list.innerHTML=""
 
   tasks.forEach(task=>{
 
-    const deadlineText = formatDate(task.deadline)
+    const deadlineText=formatDate(task.deadline)
+    const ageText=getTaskAge(task.created_at)
 
-    let deadlineClass = "deadline"
-    let cardClass = "action-card"
+    let deadlineClass="deadline"
+    let cardClass="action-card"
 
     if(deadlineText.includes("En retard")){
-      deadlineClass += " deadline-late"
-      cardClass += " card-late"
+      deadlineClass+=" deadline-late"
+      cardClass+=" card-late"
     }
     else if(deadlineText.includes("Aujourd") || deadlineText.includes("Demain")){
-      deadlineClass += " deadline-soon"
-      cardClass += " card-soon"
+      deadlineClass+=" deadline-soon"
+      cardClass+=" card-soon"
     }
 
-    const div = document.createElement("div")
-    div.className = cardClass
+    const div=document.createElement("div")
+    div.className=cardClass
 
-    div.innerHTML = `
+    div.innerHTML=`
       <div class="action-left">
-        <span class="badge ${task.priority || 'normal'}"></span>
+        <span class="badge ${task.priority}"></span>
         ${task.title}
       </div>
-      <div class="${deadlineClass}">
-        ${deadlineText}
+
+      <div style="text-align:right">
+        <div class="${deadlineClass}">
+          ${deadlineText}
+        </div>
+        <div class="age">
+          ${ageText}
+        </div>
       </div>
     `
 
-    div.ondblclick = () => archiveTask(task.id)
+    div.ondblclick=()=>archiveTask(task.id)
     list.appendChild(div)
   })
 }
+
 
 document.getElementById("saveBtn").onclick = async () => {
   const text = document.getElementById("actionText").value
