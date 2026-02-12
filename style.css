@@ -480,3 +480,46 @@ input, select{
 .delete-btn:hover{
   background:#ef4444;
 }
+
+/* ===== CADEAUX ===== */
+
+.gift-grid{
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.person-section{
+  margin-top:20px;
+  font-weight:600;
+  opacity:.6;
+  font-size:14px;
+}
+
+.gift-card{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  box-shadow:0 10px 25px rgba(0,0,0,.4);
+  transition:.25s;
+}
+
+.gift-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 35px rgba(0,0,0,.6);
+}
+
+.gift-title{
+  font-size:16px;
+  font-weight:600;
+}
+
+.gift-store{
+  font-size:13px;
+  opacity:.6;
+  margin-top:4px;
+}

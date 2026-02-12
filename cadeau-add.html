@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ajouter un cadeau</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="form-container">
+<h2>Ajouter un cadeau</h2>
+
+<input type="text" id="title" placeholder="Quel cadeau ?">
+<input type="text" id="personne" placeholder="Pour qui ?">
+<input type="text" id="magasin" placeholder="Quel magasin ?">
+<textarea id="notes" placeholder="Notes (optionnel)"></textarea>
+
+<button id="saveBtn">Enregistrer</button>
+
+<a href="cadeaux.html" class="back-link">← Retour</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl='https://fwfvbklrezgiwpfyywtv.supabase.co'
+const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
+const db=window.supabase.createClient(supabaseUrl,supabaseKey)
+
+document.getElementById("saveBtn").onclick=async()=>{
+
+  const title=document.getElementById("title").value
+  const personne=document.getElementById("personne").value
+  const magasin=document.getElementById("magasin").value
+  const notes=document.getElementById("notes").value
+
+  if(!title) return alert("Titre obligatoire")
+
+  await db.from('memories').insert([{
+    category:'cadeau',
+    title,
+    personne,
+    magasin,
+    notes
+  }])
+
+  window.location.href='cadeaux.html'
+}
+</script>
+
+</body>
+</html>

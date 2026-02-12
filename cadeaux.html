@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cadeaux</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h2>Idées Cadeaux</h2>
+  <button class="add-btn" onclick="window.location.href='cadeau-add.html'">+</button>
+</header>
+
+<div id="giftList" class="gift-grid"></div>
+
+<a href="memoire.html" class="back">← Retour</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl='https://fwfvbklrezgiwpfyywtv.supabase.co'
+const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3ZnZia2xyZXpnaXdwZnl5d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzkwNDIsImV4cCI6MjA4NjQxNTA0Mn0.g58rXlwhfqvp5AiYZUOTlS-n2g-wG2Jufdyyu6ncSrg'
+const db=window.supabase.createClient(supabaseUrl,supabaseKey)
+
+async function deleteGift(gift){
+  if(!confirm("Supprimer ce cadeau ?")) return
+  await db.from('memories').delete().eq('id',gift.id)
+  loadGifts()
+}
+
+async function loadGifts(){
+
+  const {data}=await db
+    .from('memories')
+    .select('*')
+    .eq('category','cadeau')
+    .order('personne',{ascending:true})
+    .order('created_at',{ascending:false})
+
+  const container=document.getElementById("giftList")
+  container.innerHTML=""
+
+  let currentPerson=null
+
+  data.forEach(gift=>{
+
+    if(gift.personne !== currentPerson){
+      const section=document.createElement("div")
+      section.className="person-section"
+      section.innerText=gift.personne || "Sans destinataire"
+      container.appendChild(section)
+      currentPerson=gift.personne
+    }
+
+    const card=document.createElement("div")
+    card.className="gift-card"
+
+    card.innerHTML=`
+      <div class="gift-content">
+        <div class="gift-title">${gift.title}</div>
+        <div class="gift-store">${gift.magasin || ""}</div>
+      </div>
+      <button class="delete-btn">🗑</button>
+    `
+
+    card.querySelector(".delete-btn").onclick=(e)=>{
+      e.stopPropagation()
+      deleteGift(gift)
+    }
+
+    container.appendChild(card)
+  })
+}
+
+window.onload=loadGifts
+</script>
+
+</body>
+</html>
