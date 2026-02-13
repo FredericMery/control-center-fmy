@@ -53,8 +53,9 @@ async function loadWines(){
     card.className="wine-card"
 
     const img=document.createElement("img")
-    img.className="wine-photo"
-    img.src=wine.photo_url || "https://via.placeholder.com/600x400?text=Vin"
+img.className="wine-photo"
+img.src=wine.photo_url || "https://via.placeholder.com/800x600?text=Vin"
+
 
     const deleteBtn=document.createElement("button")
     deleteBtn.className="delete-btn"
@@ -66,12 +67,14 @@ async function loadWines(){
     }
 
     const overlay=document.createElement("div")
-    overlay.className="wine-overlay"
-    overlay.innerHTML=`
-      <div class="wine-title">${wine.title}</div>
-      <div class="wine-meta">${wine.domaine || ''} ${wine.annee || ''}</div>
-      <div class="wine-stars">${"⭐".repeat(wine.rating || 0)}</div>
-    `
+overlay.className="wine-overlay"
+overlay.innerHTML=`
+  <div class="wine-title">${wine.title}</div>
+  <div class="wine-meta">${wine.domaine || ''} ${wine.annee || ''}</div>
+  <div class="wine-stars">${"⭐".repeat(wine.rating || 0)}</div>
+`
+
+    
 
     card.appendChild(img)
     card.appendChild(deleteBtn)

@@ -400,57 +400,66 @@ input, select{
 /* === VINS MODERN LIST === */
 
 .wine-grid{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
 }
 
 .wine-card{
   position:relative;
-  border-radius:20px;
+  height:220px;
+  border-radius:22px;
   overflow:hidden;
-  background:#1e293b;
-  box-shadow:0 10px 25px rgba(0,0,0,0.4);
-  transition:.3s;
   cursor:pointer;
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
+  transition:.3s ease;
 }
 
 .wine-card:hover{
-  transform:translateY(-4px);
-  box-shadow:0 15px 35px rgba(0,0,0,0.6);
+  transform:translateY(-6px);
 }
 
 .wine-photo{
   width:100%;
-  height:220px;
+  height:100%;
   object-fit:cover;
   display:block;
 }
 
+/* Overlay sombre moderne */
 .wine-overlay{
   position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  padding:16px;
-  background:linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(0,0,0,0.75) 0%,
+    rgba(0,0,0,0.3) 40%,
+    rgba(0,0,0,0.05) 100%
+  );
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:20px;
 }
 
 .wine-title{
-  font-size:18px;
+  font-size:20px;
   font-weight:600;
 }
 
 .wine-meta{
   font-size:14px;
-  opacity:.85;
+  opacity:.8;
+  margin-top:4px;
 }
 
 .wine-stars{
-  margin-top:6px;
+  margin-top:8px;
   color:#f59e0b;
+  font-size:16px;
 }
 
+/* Bouton delete plus visible */
 .delete-btn{
   position:absolute;
   top:12px;
@@ -459,7 +468,7 @@ input, select{
   height:38px;
   border-radius:50%;
   border:none;
-  background:rgba(15,23,42,0.85);
+  background:rgba(15,23,42,0.8);
   color:white;
   font-size:18px;
   display:flex;
@@ -467,8 +476,7 @@ input, select{
   justify-content:center;
   cursor:pointer;
   backdrop-filter:blur(6px);
-  box-shadow:0 6px 18px rgba(0,0,0,0.5);
-  transition:all .2s ease;
+  transition:.2s;
   z-index:10;
 }
 
@@ -477,12 +485,6 @@ input, select{
   transform:scale(1.15);
 }
 
-
-
-
-.delete-btn:hover{
-  background:#ef4444;
-}
 
 /* ===== CADEAUX ===== */
 
