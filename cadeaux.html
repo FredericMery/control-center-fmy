@@ -55,21 +55,23 @@ async function loadGifts(){
       currentPerson=gift.personne
     }
 
-  const card=document.createElement("div")
-card.className="gift-card"
+const card = document.createElement("div")
+card.className = "gift-card"
 
-card.innerHTML=`
+card.innerHTML = `
   <div class="gift-content">
     <div class="gift-title">${gift.title}</div>
-    <div class="gift-store">${gift.magasin || ""}</div>
+    <div class="gift-store">${gift.magasin || ''}</div>
   </div>
   <button class="delete-btn">🗑</button>
 `
 
-card.querySelector(".delete-btn").onclick=(e)=>{
+
+card.querySelector(".delete-btn").onclick = (e)=>{
   e.stopPropagation()
   deleteGift(gift)
 }
+
 
 
     container.appendChild(card)
